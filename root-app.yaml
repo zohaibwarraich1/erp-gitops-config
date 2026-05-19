@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: "https://github.com/my-org/erp-gitops-config.git" # Replace with actual GitHub Repo URL
+    repoURL: "https://github.com/zohaibwarraich1/erp-gitops-config.git" # Replace with actual GitHub Repo URL
     targetRevision: HEAD
     path: tenants # Watches the entire tenants folder
   destination:
