@@ -1,0 +1,6 @@
+apiVersion: v2
+name: erp-base
+description: A Helm chart for deploying multi-tenant ERP applications
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.tenant }}-erp
+  labels:
+    app: {{ .Values.tenant }}-erp
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.tenant }}-erp
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.tenant }}-erp
+    spec:
+      containers:
+        - name: erp-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.tenant }}-config
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.tenant }}-erp-svc
+  labels:
+    app: {{ .Values.tenant }}-erp
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ .Values.tenant }}-erp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.tenant }}-db-svc
+  labels:
+    app: {{ .Values.tenant }}-db
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+  selector:
+    app: {{ .Values.tenant }}-db

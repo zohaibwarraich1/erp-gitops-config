@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.tenant }}-db
+  labels:
+    app: {{ .Values.tenant }}-db
+spec:
+  serviceName: "{{ .Values.tenant }}-db-svc" # FIXED: Matches the Service name in service.yaml exactly
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.tenant }}-db
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.tenant }}-db
+    spec:
+      containers:
+        - name: postgres
+          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
+          env:
+            # Fetching Database Name directly from the ConfigMap (Single Source of Truth)
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.tenant }}-config
+                  key: DATABASE_NAME
+            # Fetching password securely from the Secret created by External Secrets (AWS Secrets Manager)
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.tenant }}-db-credentials
+                  key: POSTGRES_PASSWORD
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.database.storageSize }}
+  # Automatic DB backup strategy placeholder (Phase 6 implementation)

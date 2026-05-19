@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.tenant }}-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod # Phase 1 integration
+spec:
+  tls:
+    - hosts:
+        - {{ .Values.domain }}
+      secretName: {{ .Values.tenant }}-tls
+  rules:
+    - host: {{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.tenant }}-erp-svc
+                port:
+                  number: 80

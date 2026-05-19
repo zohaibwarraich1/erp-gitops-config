@@ -1,0 +1,23 @@
+tenant: default-tenant
+domain: default.digitalsofts.io
+db_name: erp_default
+replicas: 1
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+image:
+  repository: digitalsofts/erp-app # Updated to match CI/CD pipeline output
+  tag: latest
+  pullPolicy: IfNotPresent
+
+database:
+  image:
+    repository: postgres # Separate database for each tenant
+    tag: 14-alpine
+  storageSize: 5Gi
