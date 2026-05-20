@@ -2,7 +2,6 @@ tenant: ali
 domain: ali.zohaibofficial.online
 db_name: erp_ali
 replicas: 1
-
 resources:
   limits:
     cpu: 200m
@@ -10,14 +9,12 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
-
 image:
-  repository: zohaibwarraich/erp-dummy-app  # Updated to match CI/CD pipeline output
-  tag: latest
+  repository: zohaibwarraich/erp-dummy-app # Updated to match CI/CD pipeline output
+  tag: 9627a9fef431467f9666079129e16ee0cd7a3f9f
   pullPolicy: Always
-
 database:
   image:
-    repository: postgres  # Separate database for each tenant
+    repository: postgres # Separate database for each tenant
     tag: 14-alpine
   storageSize: 2Gi
