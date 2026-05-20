@@ -14,7 +14,7 @@ resources:
 image:
   repository: zohaibwarraich/erp-dummy-app # Updated to match CI/CD pipeline output
   tag: latest
-  pullPolicy: always
+  pullPolicy: Always
 
 database:
   image:
