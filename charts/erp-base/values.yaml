@@ -1,6 +1,6 @@
-tenant: default-tenant
-domain: default.digitalsofts.io
-db_name: erp_default
+tenant: ali
+domain: ali.zohaibofficial.online
+db_name: erp_ali
 replicas: 1
 
 resources:
@@ -12,7 +12,7 @@ resources:
     memory: 128Mi
 
 image:
-  repository: digitalsofts/erp-app # Updated to match CI/CD pipeline output
+  repository: zohaibwarraich/erp-dummy-app # Updated to match CI/CD pipeline output
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -20,4 +20,4 @@ database:
   image:
     repository: postgres # Separate database for each tenant
     tag: 14-alpine
-  storageSize: 5Gi
+  storageSize: 2Gi

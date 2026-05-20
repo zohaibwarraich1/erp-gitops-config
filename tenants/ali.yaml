@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: alrehman-traders
+  name: ali
   namespace: argocd
 spec:
   project: default
@@ -11,9 +11,9 @@ spec:
     path: charts/erp-base
     helm:
       values: |
-        tenant: alrehman-traders
-        domain: alrehman.digitalsofts.io
-        db_name: erp_alrehman
+        tenant: ali
+        domain: ali.zohaibofficial.online
+        db_name: erp_ali
         replicas: 2
         resources:
           limits:
@@ -24,7 +24,7 @@ spec:
             memory: 256Mi
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: alrehman-traders # Namespace-per-customer isolation
+    namespace: ali # Namespace-per-customer isolation
   syncPolicy:
     automated:
       prune: true
