@@ -12,12 +12,12 @@ resources:
     memory: 128Mi
 
 image:
-  repository: zohaibwarraich/erp-dummy-app # Updated to match CI/CD pipeline output
+  repository: zohaibwarraich/erp-dummy-app  # Updated to match CI/CD pipeline output
   tag: latest
   pullPolicy: Always
 
 database:
   image:
-    repository: postgres # Separate database for each tenant
+    repository: postgres  # Separate database for each tenant
     tag: 14-alpine
   storageSize: 2Gi

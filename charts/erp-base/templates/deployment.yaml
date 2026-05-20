@@ -25,5 +25,11 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.tenant }}-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.tenant }}-db-credentials
+                  key: POSTGRES_PASSWORD
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

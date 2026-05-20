@@ -5,7 +5,7 @@ metadata:
   labels:
     app: {{ .Values.tenant }}-db
 spec:
-  serviceName: "{{ .Values.tenant }}-db-svc" # FIXED: Matches the Service name in service.yaml exactly
+  serviceName: "{{ .Values.tenant }}-db-svc"  # FIXED: Matches the Service name in service.yaml exactly
   replicas: 1
   selector:
     matchLabels:
