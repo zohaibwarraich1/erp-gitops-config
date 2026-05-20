@@ -14,7 +14,7 @@ spec:
         tenant: ahmad
         domain: ahmad.zohaibofficial.online
         db_name: erp_ahmad
-        replicas: 2
+        replicas: 5
         resources:
           limits:
             cpu: 500m
