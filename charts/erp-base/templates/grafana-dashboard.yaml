@@ -1,0 +1,271 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.dashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.tenant }}-erp-grafana-dashboard
+  # Must be in the monitoring namespace so Grafana sidecar can find it
+  namespace: monitoring
+  labels:
+    # This label triggers Grafana's sidecar to auto-load this dashboard
+    grafana_dashboard: "1"
+    tenant: {{ .Values.tenant }}
+data:
+  {{ .Values.tenant }}-erp-dashboard.json: |
+    {
+      "__inputs": [],
+      "__requires": [],
+      "annotations": { "list": [] },
+      "description": "ERP Tenant Dashboard – {{ .Values.tenant }} ({{ .Values.domain }})",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+
+        {
+          "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+          "id": 100,
+          "title": "🏢 Tenant: {{ .Values.tenant }} | Domain: {{ .Values.domain }}",
+          "type": "row"
+        },
+
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 60 },
+                  { "color": "red", "value": 80 }
+                ]
+              },
+              "unit": "percent",
+              "mappings": []
+            }
+          },
+          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 1 },
+          "id": 1,
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "orientation": "auto", "textMode": "auto", "colorMode": "background", "graphMode": "area" },
+          "title": "CPU Usage %",
+          "type": "stat",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"{{ .Values.tenant }}\", pod=~\"{{ .Values.tenant }}-erp.*\", container!=\"\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"{{ .Values.tenant }}\", pod=~\"{{ .Values.tenant }}-erp.*\", resource=\"cpu\"}) * 100",
+              "legendFormat": "CPU %",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 60 },
+                  { "color": "red", "value": 80 }
+                ]
+              },
+              "unit": "percent",
+              "mappings": []
+            }
+          },
+          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 1 },
+          "id": 2,
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "orientation": "auto", "textMode": "auto", "colorMode": "background", "graphMode": "area" },
+          "title": "Memory Usage %",
+          "type": "stat",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"{{ .Values.tenant }}\", pod=~\"{{ .Values.tenant }}-erp.*\", container!=\"\"}) / sum(kube_pod_container_resource_limits{namespace=\"{{ .Values.tenant }}\", pod=~\"{{ .Values.tenant }}-erp.*\", resource=\"memory\"}) * 100",
+              "legendFormat": "Memory %",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 1 },
+                  { "color": "red", "value": 3 }
+                ]
+              },
+              "unit": "short",
+              "mappings": []
+            }
+          },
+          "gridPos": { "h": 6, "w": 6, "x": 12, "y": 1 },
+          "id": 3,
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "orientation": "auto", "textMode": "auto", "colorMode": "background", "graphMode": "none" },
+          "title": "Pod Restarts (last 5m)",
+          "type": "stat",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"{{ .Values.tenant }}\", pod=~\"{{ .Values.tenant }}-erp.*\"}[5m]))",
+              "legendFormat": "Restarts",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 1 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [
+                { "options": { "0": { "color": "green", "index": 0, "text": "Connected" }, "1": { "color": "red", "index": 1, "text": "DOWN" } }, "type": "value" }
+              ]
+            }
+          },
+          "gridPos": { "h": 6, "w": 6, "x": 18, "y": 1 },
+          "id": 4,
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "orientation": "auto", "textMode": "auto", "colorMode": "background", "graphMode": "none" },
+          "title": "DB Connectivity",
+          "type": "stat",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "max(kube_pod_status_phase{namespace=\"{{ .Values.tenant }}\", pod=~\"{{ .Values.tenant }}-db.*\", phase!=\"Running\"}) or vector(0)",
+              "legendFormat": "DB Status",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": { "color": { "mode": "palette-classic" }, "unit": "percentunit" },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+          "id": 5,
+          "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "title": "CPU Usage Over Time",
+          "type": "timeseries",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"{{ .Values.tenant }}\", pod=~\"{{ .Values.tenant }}-erp.*\", container!=\"\"}[5m])) by (pod)",
+              "legendFormat": "{{ "{{" }} pod {{ "}}" }}",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": { "color": { "mode": "palette-classic" }, "unit": "bytes" },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
+          "id": 6,
+          "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "title": "Memory Usage Over Time",
+          "type": "timeseries",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"{{ .Values.tenant }}\", pod=~\"{{ .Values.tenant }}-erp.*\", container!=\"\"}) by (pod)",
+              "legendFormat": "{{ "{{" }} pod {{ "}}" }}",
+              "refId": "A"
+            }
+          ]
+        },
+
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": { "color": { "mode": "palette-classic" }, "unit": "reqps" },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "5xx Errors" },
+                "properties": [ { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } } ]
+              }
+            ]
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+          "id": 7,
+          "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "title": "HTTP Request Rate & 5xx Errors",
+          "type": "timeseries",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(rate(nginx_ingress_controller_requests{exported_namespace=\"{{ .Values.tenant }}\", ingress=\"{{ .Values.tenant }}-ingress\"}[5m])) by (status)",
+              "legendFormat": "HTTP {{ "{{" }} status {{ "}}" }}",
+              "refId": "A"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(rate(nginx_ingress_controller_requests{exported_namespace=\"{{ .Values.tenant }}\", ingress=\"{{ .Values.tenant }}-ingress\", status=~\"5..\"}[5m]))",
+              "legendFormat": "5xx Errors",
+              "refId": "B"
+            }
+          ]
+        },
+
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+          "id": 8,
+          "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "title": "Pod Restarts Over Time",
+          "type": "timeseries",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"{{ .Values.tenant }}\", pod=~\"{{ .Values.tenant }}-erp.*\"}[5m])) by (pod)",
+              "legendFormat": "{{ "{{" }} pod {{ "}}" }}",
+              "refId": "A"
+            }
+          ]
+        }
+
+      ],
+      "refresh": "30s",
+      "schemaVersion": 38,
+      "tags": ["erp", "tenant", "{{ .Values.tenant }}"],
+      "templating": { "list": [] },
+      "time": { "from": "now-1h", "to": "now" },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "ERP Tenant – {{ .Values.tenant }}",
+      "uid": "erp-{{ .Values.tenant }}-dashboard",
+      "version": 1,
+      "weekStart": ""
+    }
+{{- end }}

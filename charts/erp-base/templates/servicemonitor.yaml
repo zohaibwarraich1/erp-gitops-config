@@ -1,0 +1,30 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.tenant }}-erp-monitor
+  namespace: {{ .Values.tenant }}
+  labels:
+    app: {{ .Values.tenant }}-erp
+    # This label is required for kube-prometheus-stack to discover this ServiceMonitor
+    release: monitoring
+spec:
+  # Only scrape services in this tenant's namespace
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.tenant }}
+  # Select the ERP service by its label
+  selector:
+    matchLabels:
+      app: {{ .Values.tenant }}-erp
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.monitoring.scrapeInterval }}
+      # Add tenant label to every scraped metric for Grafana filtering
+      relabelings:
+        - targetLabel: tenant
+          replacement: {{ .Values.tenant }}
+        - targetLabel: domain
+          replacement: {{ .Values.domain }}
+{{- end }}

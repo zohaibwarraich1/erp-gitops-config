@@ -2,6 +2,7 @@ tenant: ali
 domain: ali.zohaibofficial.online
 db_name: erp_ali
 replicas: 1
+
 resources:
   limits:
     cpu: 200m
@@ -9,12 +10,30 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
+
 image:
-  repository: zohaibwarraich/erp-dummy-app # Updated to match CI/CD pipeline output
+  repository: zohaibwarraich/erp-dummy-app
   tag: 9627a9fef431467f9666079129e16ee0cd7a3f9f
   pullPolicy: Always
+
 database:
   image:
-    repository: postgres # Separate database for each tenant
+    repository: postgres
     tag: 14-alpine
   storageSize: 2Gi
+
+# Phase 4 - Observability & Reliability
+monitoring:
+  enabled: true
+  # Prometheus scrape interval for this tenant's ERP app
+  scrapeInterval: 30s
+  # Grafana dashboard auto-loading (requires grafana sidecar enabled in kube-prometheus-stack)
+  dashboard:
+    enabled: true
+  # Alert thresholds
+  alerts:
+    enabled: true
+    podRestartThreshold: 3       # Alert if pod restarts > 3 times in 5m
+    cpuThresholdPercent: 80      # Alert if CPU > 80%
+    memoryThresholdPercent: 80   # Alert if Memory > 80%
+    http5xxThreshold: 10         # Alert if HTTP 5xx errors > 10/min
