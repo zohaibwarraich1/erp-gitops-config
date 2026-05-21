@@ -38,6 +38,8 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.tenant }}-db-credentials
                   key: POSTGRES_PASSWORD
+          resources:
+            {{- toYaml .Values.database.resources | nindent 12 }}
           ports:
             - containerPort: 5432
               name: postgres
