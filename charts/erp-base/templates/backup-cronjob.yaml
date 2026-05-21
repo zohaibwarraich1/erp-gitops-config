@@ -17,6 +17,25 @@ spec:
         spec:
           serviceAccountName: {{ .Values.tenant }}-sa
           restartPolicy: OnFailure
+          initContainers:
+            - name: fix-permissions
+              image: busybox
+              command: ["sh", "-c", "chown -R 999:999 /backup /tmp"]
+              securityContext:
+                runAsUser: 0
+                runAsNonRoot: false
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 128Mi
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backup
+                - name: tmp
+                  mountPath: /tmp
           containers:
             - name: pg-backup
               image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
