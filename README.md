@@ -151,7 +151,23 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 argocd login localhost:8080 --username admin --password <password> --insecure
 ```
 
-### Step 4: Store Secrets in AWS Secrets Manager
+### Step 4: Apply Cluster Resources
+
+Some global resources (like `ClusterIssuer` for Let's Encrypt and `ClusterSecretStore` for AWS Secrets Manager) need to be applied manually once:
+
+```bash
+kubectl apply -f cluster-resources/
+```
+
+### Step 5: Deploy ArgoCD Root Application (App of Apps)
+
+We use the "App of Apps" pattern. Instead of deploying tenants manually, we deploy one root application that automatically monitors the `tenants/` folder.
+
+```bash
+kubectl apply -f root-app.yaml
+```
+
+### Step 6: Store Secrets in AWS Secrets Manager
 
 ```bash
 # Create a secret for each tenant in AWS Secrets Manager
@@ -160,7 +176,7 @@ aws secretsmanager create-secret \
   --secret-string '{"POSTGRES_PASSWORD":"<secure-password>"}'
 ```
 
-### Step 5: Configure DNS
+### Step 7: Configure DNS
 
 Point your wildcard domain to the NLB:
 ```
@@ -216,10 +232,12 @@ aws secretsmanager create-secret \
   --secret-string '{"POSTGRES_PASSWORD":"SuperSecure123!"}'
 ```
 
-### Step 2: Create an ArgoCD Application
+### Step 2: Define the Tenant Application
 
-```bash
-kubectl apply -f - <<EOF
+Instead of applying manifests manually, simply create a new YAML file in the `tenants/` directory and push it to Git. ArgoCD's root app will automatically detect and deploy it.
+
+Create `tenants/alrehman-traders.yaml`:
+```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -253,7 +271,13 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-EOF
+```
+
+Commit and push this file:
+```bash
+git add tenants/alrehman-traders.yaml
+git commit -m "feat: onboard alrehman-traders tenant"
+git push
 ```
 
 ### Step 3: Configure DNS
