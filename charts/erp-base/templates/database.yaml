@@ -15,8 +15,7 @@ spec:
       labels:
         app: {{ .Values.tenant }}-db
     spec:
-      securityContext:
-        fsGroup: 999
+      securityContext: {}
       initContainers:
         - name: fix-permissions
           image: busybox
