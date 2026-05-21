@@ -161,7 +161,9 @@ kubectl apply -f cluster-resources/
 
 ### Step 5: Deploy ArgoCD Root Application (App of Apps)
 
-We use the "App of Apps" pattern. Instead of deploying tenants manually, we deploy one root application that automatically monitors the `tenants/` folder.
+We use the "App of Apps" pattern. Instead of deploying tenants manually, we deploy one root application (`root-app.yaml`) that is configured to automatically monitor the **`tenants/` folder** in this repository. 
+
+Whenever you place a new `<tenant>.yaml` file inside the `tenants/` folder and push it to Git, the root application will automatically sync and deploy that new tenant's infrastructure.
 
 ```bash
 kubectl apply -f root-app.yaml
@@ -232,9 +234,11 @@ aws secretsmanager create-secret \
   --secret-string '{"POSTGRES_PASSWORD":"SuperSecure123!"}'
 ```
 
-### Step 2: Define the Tenant Application
+### Step 2: Define the Tenant Application in the `tenants/` Folder
 
-Instead of applying manifests manually, simply create a new YAML file in the `tenants/` directory and push it to Git. ArgoCD's root app will automatically detect and deploy it.
+Instead of applying manifests manually using `kubectl`, you only need to create a new YAML file inside the **`tenants/`** directory of this repository and push it to Git. The `root-app.yaml` we deployed earlier is watching this specific folder and will automatically sync any new files placed here.
+
+For example, create a new file specifically at **`tenants/alrehman-traders.yaml`**:
 
 Create `tenants/alrehman-traders.yaml`:
 ```yaml
