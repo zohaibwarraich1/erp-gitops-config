@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ali
+  name: ahmad
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/zohaibwarraich1/erp-gitops-config.git' # Replace with actual GitHub Repo URL
+    repoURL: 'https://github.com/zohaibwarraich1/erp-gitops-config.git'
     targetRevision: HEAD
     path: charts/erp-base
     helm:
       values: |
-        tenant: ali
-        domain: ali.zohaibofficial.online
-        db_name: erp_ali
+        tenant: ahmad
+        domain: ahmad.zohaibofficial.online
+        db_name: erp_ahmad
         replicas: 2
         resources:
           limits:
@@ -24,7 +24,7 @@ spec:
             memory: 256Mi
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: ali # Namespace-per-customer isolation
+    namespace: ahmad # Namespace-per-customer isolation
   syncPolicy:
     automated:
       prune: true

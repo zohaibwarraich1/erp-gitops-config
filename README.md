@@ -27,8 +27,7 @@ The platform is composed of three repositories working together:
 | Repository | Purpose |
 |---|---|
 | **erp-dummy-app** | Application source code, Dockerfile, CI pipeline (GitHub Actions) |
-| **erp-gitops-config** | Helm charts, tenant configurations, ArgoCD application manifests (this repo) |
-| **erp-gitops-platform** | Terraform IaC for provisioning AWS infrastructure (VPC, EKS, Helm releases) |
+| **erp-gitops-config** | Helm charts, tenant configurations, ArgoCD manifests, and Terraform IaC |
 
 ### Platform Components
 
@@ -91,6 +90,10 @@ erp-gitops-config/
 │   ├── architecture-diagram.png     # Visual architecture diagram
 │   └── restore-process.md          # Step-by-step DB restore guide
 └── README.md                       # This file
+└── infrastructure/                 # Terraform IaC for AWS infrastructure
+    ├── vpc.tf                    # VPC and subnet definitions
+    ├── eks.tf                    # EKS cluster definition
+    └── helm-releases.tf          # Core cluster services installation
 ```
 
 ---
@@ -109,9 +112,9 @@ erp-gitops-config/
 ### Step 1: Provision Infrastructure (Terraform)
 
 ```bash
-# Clone the platform repository
-git clone https://github.com/zohaibwarraich1/erp-gitops-platform.git
-cd erp-gitops-platform/phase1-infrastructure
+# Clone the repository
+git clone https://github.com/zohaibwarraich1/erp-gitops-config.git
+cd erp-gitops-config/infrastructure
 
 # Initialize and apply Terraform
 terraform init
@@ -368,7 +371,7 @@ For the full detailed guide, see [docs/restore-process.md](docs/restore-process.
 
 Since the entire platform is defined as code, recovery is deterministic:
 
-1. **Infrastructure:** Re-run `terraform apply` in `erp-gitops-platform` to recreate the cluster.
+1. **Infrastructure:** Re-run `terraform apply` in the `infrastructure/` directory to recreate the cluster.
 2. **Applications:** ArgoCD will automatically re-sync all tenant applications from this repository.
 3. **Data:** Restore databases from backup PVCs (if using EBS-backed PVs, snapshots can be used).
 
