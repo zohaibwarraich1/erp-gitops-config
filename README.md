@@ -22,7 +22,7 @@ A production-grade, multi-tenant ERP deployment platform built on Kubernetes and
 
 ![Architecture Diagram](docs/architecture-diagram.png)
 
-The platform is composed of three repositories working together:
+The platform is composed of two repositories working together:
 
 | Repository | Purpose |
 |---|---|
