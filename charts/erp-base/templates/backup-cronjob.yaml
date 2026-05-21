@@ -1,0 +1,84 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.tenant }}-backup-cronjob
+  labels:
+    app: {{ .Values.tenant }}-backup
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: {{ .Values.tenant }}-backup
+        spec:
+          serviceAccountName: {{ .Values.tenant }}-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: pg-backup
+              image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Starting DB backup..."
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="/backup/{{ .Values.tenant }}_backup_${TIMESTAMP}.sql"
+                  
+                  # Export the password so pg_dump doesn't prompt
+                  export PGPASSWORD=$POSTGRES_PASSWORD
+                  
+                  pg_dump -h {{ .Values.tenant }}-db-svc -U postgres -d $DATABASE_NAME -f $BACKUP_FILE
+                  
+                  if [ $? -eq 0 ]; then
+                    echo "Backup successful: $BACKUP_FILE"
+                  else
+                    echo "Backup failed!"
+                    exit 1
+                  fi
+                  
+                  echo "Enforcing retention policy ({{ .Values.backup.retentionDays }} days)..."
+                  find /backup -name "*.sql" -type f -mtime +{{ .Values.backup.retentionDays }} -exec rm -f {} \;
+                  echo "Retention policy enforced."
+              env:
+                - name: DATABASE_NAME
+                  valueFrom:
+                    configMapKeyRef:
+                      name: {{ .Values.tenant }}-config
+                      key: DATABASE_NAME
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.tenant }}-db-credentials
+                      key: POSTGRES_PASSWORD
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 999
+                runAsGroup: 999
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backup
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: {{ .Values.tenant }}-backup-storage
+            - name: tmp
+              emptyDir: {}
+{{- end }}

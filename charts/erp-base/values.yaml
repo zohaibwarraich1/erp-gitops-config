@@ -40,3 +40,9 @@ monitoring:
     cpuThresholdPercent: 80 # Alert if CPU > 80%
     memoryThresholdPercent: 80 # Alert if Memory > 80%
     http5xxThreshold: 10 # Alert if HTTP 5xx errors > 10/min
+# Phase 6 - Backup & Recovery
+backup:
+  enabled: true
+  schedule: "0 2 * * *" # Daily at 2 AM
+  retentionDays: 7
+  storageSize: 5Gi

@@ -66,4 +66,46 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+    {{- if .Values.backup.enabled }}
+    # Allow traffic from backup cronjob
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.tenant }}-backup
+      ports:
+        - protocol: TCP
+          port: 5432
+    {{- end }}
   egress: [] # DB doesn't need to initiate outbound connections
+{{- if .Values.backup.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.tenant }}-backup-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.tenant }}-backup
+  policyTypes:
+    - Egress
+  egress:
+    # Allow traffic to DB
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.tenant }}-db
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow traffic to DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+{{- end }}
