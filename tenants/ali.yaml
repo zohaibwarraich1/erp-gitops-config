@@ -14,7 +14,7 @@ spec:
         tenant: ali
         domain: ali.zohaibofficial.online
         db_name: erp_ali
-        replicas: 5
+        replicas: 2
         resources:
           limits:
             cpu: 500m
