@@ -14,6 +14,12 @@ spec:
       labels:
         app: {{ .Values.tenant }}-erp
     spec:
+      serviceAccountName: {{ .Values.tenant }}-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
         - name: erp-app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -22,6 +28,14 @@ spec:
             - name: http
               containerPort: 5000
               protocol: TCP
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           envFrom:
             - configMapRef:
                 name: {{ .Values.tenant }}-config
@@ -33,3 +47,6 @@ spec:
                   key: POSTGRES_PASSWORD
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}

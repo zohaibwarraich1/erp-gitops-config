@@ -1,0 +1,69 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.tenant }}-erp-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.tenant }}-erp
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from NGINX Ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 5000
+    # Allow traffic from Prometheus (in monitoring namespace)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 5000
+  egress:
+    # Allow traffic to DB
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.tenant }}-db
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow traffic to DNS (required for service discovery)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.tenant }}-db-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.tenant }}-db
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Only allow traffic from the ERP app in the same namespace
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.tenant }}-erp
+      ports:
+        - protocol: TCP
+          port: 5432
+  egress: [] # DB doesn't need to initiate outbound connections

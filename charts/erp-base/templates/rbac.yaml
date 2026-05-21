@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.tenant }}-sa
+  labels:
+    app: {{ .Values.tenant }}-erp
+automountServiceAccountToken: false
+---
+# We could add a Role/RoleBinding here if the app needed specific API access.
+# Since it does not, providing a dedicated ServiceAccount with automountToken=false is sufficient for security hardening.
