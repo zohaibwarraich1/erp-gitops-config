@@ -11,7 +11,7 @@ resources:
     memory: 128Mi
 image:
   repository: zohaibwarraich/erp-dummy-app
-  tag: f2c87dc2626a0e9348ae1ce4e0e3d727cadfc656
+  tag: d3906e04fa720cd002bf1fed7c0a4625d59ddebe
   pullPolicy: Always
 database:
   image:
