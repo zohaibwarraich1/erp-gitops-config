@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: waqas
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/zohaibwarraich1/erp-gitops-config.git'
+    targetRevision: HEAD
+    path: charts/erp-base
+    helm:
+      values: |
+        tenant: waqas
+        domain: waqas.zohaibofficial.online
+        db_name: erp_waqas
+        replicas: 2
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: waqas # Namespace-per-customer isolation
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
