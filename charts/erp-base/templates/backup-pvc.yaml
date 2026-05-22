@@ -6,6 +6,7 @@ metadata:
   labels:
     app: {{ .Values.tenant }}-backup
 spec:
+  storageClassName: ebs-sc-immediate
   accessModes:
     - ReadWriteOnce
   resources:
