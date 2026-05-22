@@ -194,6 +194,11 @@ resource "helm_release" "loki_stack" {
     value = "false"
   }
 
+  set {
+    name  = "grafana.sidecar.datasources.enabled"
+    value = "false"
+  }
+
   # Set Loki retention period to 30 days
   set {
     name  = "loki.config.chunk_store_config.max_look_back_period"
